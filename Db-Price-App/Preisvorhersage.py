@@ -1,18 +1,45 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pandas
 import streamlit as st
+import psycopg2
+import psycopg2.extras
+from sqlalchemy import create_engine
+
+conn = psycopg2.connect(host ="dpg-cajo73sgqg428kba9ikg-a.frankfurt-postgres.render.com",
+                        database="dbticket", 
+                        user="dbticket_user", 
+                        password="Nhaema5GzFDyW3j0sGHVYjfhRBu0fTvy")
+engine = create_engine('postgresql://dbticket_user:Nhaema5GzFDyW3j0sGHVYjfhRBu0fTvy@dpg-cajo73sgqg428kba9ikg-a.frankfurt-postgres.render.com/dbticket')
+cursor = conn.cursor()
+
 
 st.title('Preisvorhersage')
 
-df = pd.read_csv('Test.csv', sep=";")
-df.tail()
 
+def minimum():
+  sele=cursor.execute('''SELECT MIN(zahlen) FROM zahlentest2''')
+  lowest=cursor.fetchone()
+  max=cursor.execute ('''SELECT MAX(zahlen) FROM zahlentest2''')
+  highest=cursor.fetchone()
+  data=cursor.execute('''SELECT datum FROM zahlentest2  WHERE zahlen=(SELECT MIN(zahlen) FROM zahlentest2)''')
+  datum2=cursor.fetchone()
+  result=pandas.DataFrame(columns=["Minimum","Maximum","Datum"])
+  result.loc[len(result)]=[lowest,highest,datum2]   
+  result.to_sql(name="minmax2", con=engine, if_exists="append")
+  result=result[0:0]
+
+minimum()
+#df=cursor.execute("SELECT * FROM minmax2")
+#print(df)
+df = pd.read_sql("SELECT * FROM minmax2",conn)
+
+print(df)
 
 train_size = int(len(df) * 0.8)
 df_train, df_test = df[:train_size], df[train_size:len(df)]
 train_data = df_train.iloc[:, 1:2].values
-
 
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -22,7 +49,7 @@ train_data_scaled = scaler.fit_transform(train_data)
 x_train = []
 y_train = []
 
-time_window = 7
+time_window = 2
 
 for i in range(time_window, len(train_data_scaled)):
   x_train.append(train_data_scaled[i-time_window:i, 0])
@@ -54,7 +81,7 @@ model.fit(x_train, y_train, epochs=25, batch_size=32)
 
 actual_stock_price = df_test.iloc[:, 1:2].values
 
-total_data = pd.concat((df_train['Preis'], df_test['Preis']), axis=0)
+total_data = pd.concat((df_train['Minimum'], df_test['Minimum']), axis=0)
 test_data = total_data[len(total_data)-len(df_test)-time_window:].values
 test_data = test_data.reshape(-1, 1)
 test_data = scaler.transform(test_data)
