@@ -280,27 +280,32 @@ if optionen2=="Home":
 
         
 
-        if "THA" in art_zug_zv2:
+        if "Verbindung liegt in der Vergangenheit" in sparpreis_zv1: 
+          print("Diese Verbindung liegt in der Vergangenheit. Wählen Sie eine andere Verbindung")
+          break
+
+        else: 
+            if "THA" in art_zug_zv2:
         
-            print("Diese Zugverbindung wird nicht von uns unterstüzt. Bitte wählen Sie eine Verbindung der Züge von der DB.")
-            break
-        
-        else:
-            if "VRS-Tarif" in sparpreis_zv1:
-                    
+              print("Diese Zugverbindung wird nicht von uns unterstüzt. Bitte wählen Sie eine Verbindung der Züge von der DB.")
+              break
+
+          else: 
+              if "VRS-Tarif" in sparpreis_zv1:
+              
                 print ("Hier ist kein Vergleich notwendig, da diese Verbindung zu VRS-Tarifen angeboten wird.")
-                #break 
-                    
-            else: 
+                break 
             
-                anfrage= time.strftime("%d.%m. %H:%M")
-                print(anfrage),
-                print("Stationen: ",station1,station2),
-                print("Fahrzeit: ",zeiten_zv1),
-                print("Art des Zuges/der Züge: ",art_zug_zv2),
-                print("Die Verbindung kostet: ",sparpreis_zv1),
+               else: 
+                   anfrage_tage= time.strftime("%d.%m.")
+                   anfrage_zeit=time.strftime("%H:%M")
+                   print(anfrage_tage,anfrage_zeit)
+                   print("Stationen: ",station1,station2)
+                   print("Fahrzeit: ",zeiten_zv1)
+                   print("Art des Zuges/der Züge: ",art_zug_zv2)
+                   print("Die Verbindung kostet: ",sparpreis_zv1)
                 
-            sleep(18)
+               sleep(18)
         
          
                             
