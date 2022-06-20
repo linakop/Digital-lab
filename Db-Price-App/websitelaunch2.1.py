@@ -287,28 +287,25 @@ if optionen2=="Home":
         else: 
             if "THA" in art_zug_zv2:
         
-              print("Diese Zugverbindung wird nicht von uns unterstüzt. Bitte wählen Sie eine Verbindung der Züge von der DB.")
-              break
+             print("Diese Zugverbindung wird nicht von uns unterstüzt. Bitte wählen Sie eine Verbindung der Züge von der DB.")
+             break
 
-          else: 
-              if "VRS-Tarif" in sparpreis_zv1:
+            else: 
+                if "VRS-Tarif" in sparpreis_zv1:
               
-                print ("Hier ist kein Vergleich notwendig, da diese Verbindung zu VRS-Tarifen angeboten wird.")
-                break 
+                   print ("Hier ist kein Vergleich notwendig, da diese Verbindung zu VRS-Tarifen angeboten wird.")
+                   break 
             
-               else: 
-                   anfrage_tage= time.strftime("%d.%m.")
-                   anfrage_zeit=time.strftime("%H:%M")
-                   print(anfrage_tage,anfrage_zeit)
-                   print("Stationen: ",station1,station2)
-                   print("Fahrzeit: ",zeiten_zv1)
-                   print("Art des Zuges/der Züge: ",art_zug_zv2)
-                   print("Die Verbindung kostet: ",sparpreis_zv1)
-                
-               sleep(18)
+                else: 
+                    anfrage_tage= time.strftime("%d.%m.")
+                    anfrage_zeit=time.strftime("%H:%M")
+                    result=pandas.DataFrame(columns=["Anfrage Tag","Anfrage Uhrzeit","Startbahnhof", "Zielbahnhof","Fahrzeit","Preis"])
+                    result.loc[len(result)]=[anfrage_tage,anfrage_zeit,station1,station2,zeiten_zv1,sparpreis_zv1]
+                    result.to_sql(name=wunsch, con=engine, if_exists="append" )
+                    result=result[0:0]
+                sleep(18) 
         
          
-                            
 
 if optionen2=="Registrierung":
     eingabe=st.text_input("Username:")
@@ -319,15 +316,17 @@ if optionen2=="Registrierung":
 
  
     def add_userdata(eingabe,passw1):
-        result=pandas.DataFrame(columns=["username","passwort"])   
-        result.loc[len(result)]=[eingabe,passw1]
-        result.to_sql(name="login", con=engine, if_exists="append")
-        result=result[0:0]
-    def einmaligeinfuegen(eingabe):
-        einf=cursor.execute('ALTER TABLE login ADD PRIMARY KEY (username);')
-        #if not cursor.fetchone():
-        st.info("Der Benutzername existiert bereits")
-        #else:
+        anf=cursor.execute("Select login.username From login where username=%s",[eingabe])
+        if not cursor.fetchone():
+            passw1 = bcrypt.hashpw(passw1.encode("utf-8"), bcrypt.gensalt(5)).decode("utf-8")
+            result=pandas.DataFrame(columns=["username","passwort"])
+            result.loc[len(result)]=[eingabelog,passw1]
+            result.to_sql(name="login", con=engine, if_exists="append")
+            result=result[0:0]
+            st.info("Erfolgreich registriert")
+        else:
+            st.warning("Der Benutzername existiert bereits")
+    
             
     if register:   
         add_userdata(eingabe,passw1)
@@ -464,14 +463,14 @@ if optionen2=="Email-Benachrichtigung":
                             st.write("Ihre Kaufbereitschaft ist sehr hoch") 
         
                 
-def tabelleerstellen():
-    result=pandas.DataFrame(columns=["Anfrage", "Alter", "Bahnkarte", "Startbahnhof", "Zielbahnhof", "Datum", "Abfahrtszeit", "Ankunftszeit", "Zugart",
-                        "Preis"])  
-    result.loc[len(result)]=[str(anfrage), alter_1, bahnkarteneu, start, ziel, datum, abfahrt_zv1, ankunft_zv1, art_zug_zv1,
-                        sparpreis2_zv1]
-    result.to_sql(name="tabelle1", con=engine, if_exists="append" )
-    result=result[0:0]
-    sleep(18)
+#def tabelleerstellen():
+    #result=pandas.DataFrame(columns=["Anfrage", "Alter", "Bahnkarte", "Startbahnhof", "Zielbahnhof", "Datum", "Abfahrtszeit", "Ankunftszeit", "Zugart",
+                       # "Preis"])  
+    #result.loc[len(result)]=[str(anfrage), alter_1, bahnkarteneu, start, ziel, datum, abfahrt_zv1, ankunft_zv1, art_zug_zv1,
+                      #  sparpreis2_zv1]
+   # result.to_sql(name="tabelle1", con=engine, if_exists="append" )
+    #result=result[0:0]
+   # sleep(18)
 
         
 
