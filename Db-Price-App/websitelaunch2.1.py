@@ -7,11 +7,8 @@ import psycopg2
 import psycopg2.extras
 from sqlalchemy import create_engine
 import pandas
-import streamlit as st
-
 from bs4 import BeautifulSoup
 import requests
-import csv
 import time 
 from time import sleep
 import matplotlib.pyplot as plt
@@ -25,7 +22,6 @@ import datetime
 from streamlit.cli import main  
 from streamlit.proto.RootContainer_pb2 import RootContainer
 import pandas as pd 
-import streamlit as st
 import plotly.figure_factory as ff
 import numpy as np
 from streamlit_option_menu import option_menu 
@@ -35,15 +31,8 @@ from http.client import CONFLICT
 from re import X
 from telnetlib import DO
 from typing import Collection
-import psycopg2
-import psycopg2.extras
-from sqlalchemy import create_engine
-import pandas
 import smtplib, ssl
-import requests
-import streamlit as st
-import time
-import yagmail   
+
 
 
 
