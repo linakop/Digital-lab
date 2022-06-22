@@ -36,6 +36,7 @@ import smtplib, ssl
 import mysql.connector
 import time
 
+
 def app():
     st.title("Preisvorhersage/Diagramm")
 
@@ -46,11 +47,47 @@ def app():
 
     engine = create_engine('postgresql://dbticket_user:Nhaema5GzFDyW3j0sGHVYjfhRBu0fTvy@dpg-cajo73sgqg428kba9ikg-a.frankfurt-postgres.render.com/dbticket')
     cursor = conn.cursor()
-    
+
+    coll1,coll2=st.columns(2)
+    with coll1:
+            loginname=st.text_input("Login: ",st.session_state.user)
+            loginpassw=st.text_input("Passwort:",type="password")
+            anfragenlistebenutzer=[]
+                            
+            def Login(loginname,loginpassw):
+                abfrage = cursor.execute("SELECT login.username FROM login WHERE username=%s", [loginname])
+                if not cursor.fetchone():  # An empty result evaluates to False.
+                    st.write("Kein Benutzer mit diesem Benutzernamen")
+                else:
+                    abfragep = cursor.execute("""SELECT login.passwort FROM login WHERE passwort=%s""", [loginpassw])
+                    if not cursor.fetchone():  # An empty result evaluates to False.
+                        st.write("Falsches Passwort")
+                    else:
+                        st.write("Sie haben sich erfolgreich eingeloggt")
+                        
+            def zuordnen(loginname):
+                richtigentabellen=cursor.execute("Select anfragen.tabelle from anfragen where username=%s", [loginname])
+                alleanfragen=cursor.fetchall()
+                if alleanfragen==None:
+                    st.info("Zu diesem Benutzernamen gibt es noch keine Tabelle") 
+                else:
+                    if "tabe" not in st.session_state :
+                        st.session_state.tabe= True
+                    for tabell in alleanfragen:
+                        anfragenlistebenutzer.append(tabell[0])
+                        boxen=st.selectbox("Tabelle: ", anfragenlistebenutzer)
+                    st.write(boxen)
+                    
+            with coll2:         
+                with st.form(key='form10'):
+                    st.text_input("Benutzer",loginname)
+                    tab=st.form_submit_button(label='Tabellen zeigen')
+            if tab:  
+                zuordnen(loginname)
+
 
     
-    data_tabelle = pd.read_sql("SELECT * FROM {wunsch}",conn)
-
+    data_tabelle = pd.read_sql("SELECT * FROM %s",[tab],conn)
     df_diagramm = pd.DataFrame(data)
 
 
@@ -66,7 +103,7 @@ def app():
 
 
 
-    cursor.execute("SELECT DISTINCT anfrage_tag FROM {wunsch}")
+    cursor.execute("SELECT DISTINCT anfrage_tag FROM %s",[tab])
 
     inhalt = cursor.fetchall()
     mins=[]
@@ -77,7 +114,7 @@ def app():
 
     for d in inhalt:
         date=str(d[0])
-        cursor.execute(f"SELECT MIN(preis), MAX(preis) FROM {wunsch} WHERE anfrage_tag = '{date}' ") 
+        cursor.execute(f"SELECT MIN(preis), MAX(preis) FROM {} WHERE anfrage_tag = '{date}'".format(tab)) 
         res=cursor.fetchone()
         mini=res[0]
         maxi=res[1]
@@ -175,41 +212,4 @@ def app():
     
 
 
-    
-    coll1,coll2=st.columns(2)
-    with coll1:
-            loginname=st.text_input("Login: ",st.session_state.user)
-            loginpassw=st.text_input("Passwort:",type="password")
-            anfragenlistebenutzer=[]
-                            
-            def Login(loginname,loginpassw):
-                abfrage = cursor.execute("SELECT login.username FROM login WHERE username=%s", [loginname])
-                if not cursor.fetchone():  # An empty result evaluates to False.
-                    st.write("Kein Benutzer mit diesem Benutzernamen")
-                else:
-                    abfragep = cursor.execute("""SELECT login.passwort FROM login WHERE passwort=%s""", [loginpassw])
-                    if not cursor.fetchone():  # An empty result evaluates to False.
-                        st.write("Falsches Passwort")
-                    else:
-                        st.write("Sie haben sich erfolgreich eingeloggt")
-                        
-            def zuordnen(loginname):
-                richtigentabellen=cursor.execute("Select anfragen.tabelle from anfragen where username=%s", [loginname])
-                alleanfragen=cursor.fetchall()
-                if alleanfragen==None:
-                    st.info("Zu diesem Benutzernamen gibt es noch keine Tabelle") 
-                else:
-                    if "tabe" not in st.session_state :
-                        st.session_state.tabe= True
-                    for tabell in alleanfragen:
-                        anfragenlistebenutzer.append(tabell[0])
-                    boxen=st.selectbox("Tabelle: ", anfragenlistebenutzer)
-                    st.write(boxen)
-                    
-            with coll2:         
-                with st.form(key='form10'):
-                    st.text_input("Benutzer",loginname)
-                    tab=st.form_submit_button(label='Tabellen zeigen')
-            if tab:  
-                zuordnen(loginname)
-            
+   
