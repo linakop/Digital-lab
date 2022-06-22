@@ -266,6 +266,9 @@ if optionen2=="Home":
         preis_zv1=zugverbindungen.find("div",class_="connectionAction").get_text(strip=True)
         sparpreis_zv2=preis_zv1.replace("ab","")
         sparpreis_zv1=sparpreis_zv2.replace("Rückfahrt hinzufügen","")
+        sparpreis_zv=sparpreis_zv1.replace("€","")
+      s parpreis_ohne_punkt=sparpreis_zv.replace(",",".")
+        preis_float=float(sparpreis_ohne_punkt)
 
         
 
@@ -288,8 +291,8 @@ if optionen2=="Home":
                 else: 
                     anfrage_tage= time.strftime("%d.%m.")
                     anfrage_zeit=time.strftime("%H:%M")
-                    result=pandas.DataFrame(columns=["Anfrage Tag","Anfrage Uhrzeit","Startbahnhof", "Zielbahnhof","Fahrzeit","Preis"])
-                    result.loc[len(result)]=[anfrage_tage,anfrage_zeit,station1,station2,zeiten_zv1,sparpreis_zv1]
+                    result=pandas.DataFrame(columns=["anfrage_tag","anfrage_uhrzeit","startbahnhof", "zielbahnhof","fahrzeit","preis"])
+                 r  esult.loc[len(result)]=[anfrage_tage,anfrage_zeit,station1,station2,zeiten_zv1,preis_float]
                     result.to_sql(name=wunsch, con=engine, if_exists="append" )
                     result=result[0:0]
                 sleep(18) 
@@ -358,6 +361,8 @@ if optionen2=="Diagramm":
                 tab=st.form_submit_button(label='Tabellen zeigen')
             if tab:  
                 zuordnen(loginname)
+            
+            
         
 if optionen2=="Kontakt":
     st.subheader("Hallo!")
